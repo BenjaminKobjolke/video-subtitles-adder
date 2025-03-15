@@ -104,7 +104,8 @@ class Config:
             'outline_width': self.config.getint('Subtitles', 'outline_width', fallback=1),
             'position': self.config.get('Subtitles', 'position', fallback='bottom'),
             'max_chars_per_line': self.config.getint('Subtitles', 'max_chars_per_line', fallback=40),
-            'save_srt': self.config.getboolean('Subtitles', 'save_srt', fallback=True)
+            'save_srt': self.config.getboolean('Subtitles', 'save_srt', fallback=True),
+            'burn_subtitles': self.config.getboolean('Subtitles', 'burn_subtitles', fallback=False)
         }
     
     def get_processing_settings(self) -> Dict[str, Any]:

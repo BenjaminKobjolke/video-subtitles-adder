@@ -107,6 +107,7 @@ class Subtitler:
         outline_color = self.settings['outline_color']
         outline_width = self.settings['outline_width']
         position = self.settings['position']
+        burn_subtitles = self.settings.get('burn_subtitles', False)
         
         # Determine vertical position
         if position == 'top':
@@ -120,25 +121,49 @@ class Subtitler:
         self.logger.info(f"Video path: {video_path}")
         self.logger.info(f"SRT path: {srt_path}")
         self.logger.info(f"Output path: {output_path}")
+        self.logger.info(f"Burn subtitles: {burn_subtitles}")
         
-        # Use a different approach - use the subtitle file directly
-        # This is more reliable than the subtitles filter
-        command = [
-            "ffmpeg",
-            "-i", video_path,
-            "-f", "srt",
-            "-i", srt_path,
-            "-map", "0:v",
-            "-map", "0:a",
-            "-map", "1",
-            "-c:v", "libx264",
-            "-crf", "18",
-            "-c:a", "copy",
-            "-c:s", "mov_text",
-            "-metadata:s:s:0", f"language=eng",
-            "-y",  # Overwrite output file if it exists
-            output_path
-        ]
+        if burn_subtitles:
+            # Burn subtitles directly into the video using the simple subtitles filter
+            # Based on FFmpeg documentation: ffmpeg -i video.avi -vf subtitles=subtitle.srt out.avi
+            
+            # Use the simple subtitles filter syntax with properly escaped path
+            # Convert backslashes to forward slashes and escape special characters
+            escaped_srt_path = srt_path.replace('\\', '/').replace(':', '\\:')
+            
+            # Use the -copyts option to preserve timestamps
+            command = [
+                "ffmpeg",
+                "-i", video_path,
+                "-vf", f"subtitles='{escaped_srt_path}'",  # Quoted and escaped path
+                "-c:v", "libx264",
+                "-crf", "18",
+                "-c:a", "copy",
+                "-y",  # Overwrite output file if it exists
+                output_path
+            ]
+            
+            self.logger.info("Using burned-in subtitles (permanently embedded in video)")
+        else:
+            # Add subtitles as a separate track (can be turned on/off)
+            command = [
+                "ffmpeg",
+                "-i", video_path,
+                "-f", "srt",
+                "-i", srt_path,
+                "-map", "0:v",
+                "-map", "0:a",
+                "-map", "1",
+                "-c:v", "libx264",
+                "-crf", "18",
+                "-c:a", "copy",
+                "-c:s", "mov_text",
+                "-metadata:s:s:0", f"language=eng",
+                "-y",  # Overwrite output file if it exists
+                output_path
+            ]
+            
+            self.logger.info("Using subtitle track (can be turned on/off in video players)")
         
         # Log the full command for debugging
         self.logger.info(f"FFmpeg command: {' '.join(command)}")

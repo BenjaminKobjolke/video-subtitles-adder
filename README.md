@@ -2,6 +2,14 @@
 
 A Python application that automatically adds subtitles to videos using OpenAI's Whisper speech recognition model.
 
+## Demo
+
+See the application in action:
+
+![Demo GIF](media/demo.gif)
+
+The demo shows how the application automatically transcribes speech and adds subtitles to a video, with both subtitle track and burned-in subtitle options.
+
 ## Features
 
 - Automatically transcribe audio from videos using OpenAI Whisper
@@ -122,6 +130,38 @@ The application includes several features to ensure high-quality subtitles:
 3. **Overlap Prevention**: Ensures that subtitle entries don't overlap in time, which would cause flickering or simultaneous display of multiple subtitles.
 
 These quality improvements work automatically in the background to produce clean, professional-looking subtitles without requiring any manual intervention.
+
+### Subtitle Embedding Options
+
+You can choose how subtitles are embedded in the video using the `burn_subtitles` setting in the `[Subtitles]` section:
+
+```ini
+# Set to true to burn subtitles directly into the video (cannot be turned off)
+burn_subtitles = false
+```
+
+There are two options:
+
+1. **Subtitle Track** (default, `burn_subtitles = false`):
+
+   - Adds subtitles as a separate track in the video file
+   - Subtitles can be turned on/off in video players that support subtitle tracks
+   - Preserves the original video quality
+   - More flexible for future editing or language changes
+
+2. **Burned-in Subtitles** (`burn_subtitles = true`):
+   - Permanently renders the subtitles directly onto the video frames
+   - Subtitles are always visible and cannot be turned off
+   - Works in any video player, even those that don't support subtitle tracks
+   - Useful for platforms that don't support subtitle tracks (e.g., some social media)
+
+Choose the option that best fits your needs based on where and how you'll be using the videos.
+
+#### Technical Note on Burned-in Subtitles
+
+The application uses FFmpeg's `subtitles` filter to burn subtitles directly into the video frames. This requires FFmpeg to be compiled with libass support, which is included in most standard FFmpeg distributions.
+
+The burned-in subtitles use the same font, size, color, and position settings as specified in the `[Subtitles]` section of settings.ini. However, some advanced styling options may only be available when using subtitle tracks.
 
 ## GPU Acceleration
 
